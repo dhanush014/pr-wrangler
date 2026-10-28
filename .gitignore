@@ -1,0 +1,20 @@
+# Secrets: never commit real API keys.
+.env
+.env.*
+
+# Build output, environments, caches.
+.mda/
+.venv/
+__pycache__/
+node_modules/
+.DS_Store
+
+# Local test output from the check scripts.
+runs/
+
+# The demo app has its own repo: github.com/dhanush014/tiny-todo
+todo-app/
+
+# Notes for a different project.
+CONCIERGE_VIDEO.md
+PROJECTS_OVERVIEW.md

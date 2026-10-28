@@ -1,0 +1,22 @@
+{
+  "_note": "Planted answers for the check script (phase 8). Extra findings are fine; missing these is a failure.",
+  "review_guide": {
+    "1": { "start_here": "app.js", "finding": "Most of the diff is CSS; the real logic is the due/overdue lines in app.js (addTodo + render)." },
+    "2": { "start_here": "app.js", "finding": "Removes the delete confirmation (confirm() line) inside a styling PR. Also hardcodes #ffffff card background instead of var(--surface)." },
+    "3": { "start_here": "app.js", "finding": "clearCompleted keeps done to-dos and deletes active ones: filter((t) => t.done) is inverted." },
+    "5": { "risk": "low" }
+  },
+  "dependency_gate": {
+    "13": { "flag": "duplicate", "finding": "Adds moment; date-fns (already a dependency) has formatDistanceToNow." },
+    "14": { "flag": "vulnerable", "finding": "lodash 4.17.15 has known advisories (fixed in 4.17.21); pulls all of lodash for one debounce." },
+    "15": { "flag": "version-drift", "with": 11, "finding": "canvas-confetti ^1.9.3 here vs pinned 1.6.0 in #11." },
+    "11": { "flag": "version-drift", "with": 15 },
+    "clean": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12]
+  },
+  "queue_planner": {
+    "quick_wins": [8, 9, 12],
+    "collisions": [[2, 4], [4, 5]],
+    "review_together": [[6, 7], [11, 15]],
+    "blocked": { "10": 2 }
+  }
+}

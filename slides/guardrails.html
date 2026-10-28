@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>PR Wrangler Guardrails</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; background: #0f1419; }
+  body { font-family: -apple-system, "SF Pro Display", "Segoe UI", Helvetica, Arial, sans-serif;
+         color: #e6edf3; padding: 50px 88px; }
+  h1 { font-size: 64px; font-weight: 700; letter-spacing: -1px; }
+  h1 span { color: #f0a35e; }
+  .sub { font-size: 26px; color: #8b98a5; margin-top: 10px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 40px; margin-top: 32px; }
+  .group h2 { font-size: 20px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+              color: #f0a35e; margin-bottom: 14px; }
+  .row { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 18px;
+         background: #161d25; border: 1px solid #263140; border-radius: 14px;
+         padding: 15px 24px; margin-bottom: 12px; }
+  .name { font-size: 27px; font-weight: 650; }
+  .what { font-size: 21px; color: #a9b6c3; margin-top: 4px; line-height: 1.35; }
+  .file { font-family: "SF Mono", Menlo, monospace; font-size: 17px; color: #7ee0c3; margin-top: 8px; }
+  .badge { font-size: 17px; font-weight: 700; padding: 6px 12px; border-radius: 999px; white-space: nowrap; }
+  .trace { background: #f0a35e; color: #1b1206; }
+  .code  { background: #263140; color: #c9d6e2; }
+</style>
+</head>
+<body>
+  <h1>🤠 PR Wrangler <span>Guardrails</span></h1>
+  <div class="sub">What the agents can touch, what order they work in, and what they're allowed to output.</div>
+
+  <div class="grid">
+    <div>
+      <div class="group">
+        <h2>Access</h2>
+        <div class="row"><div>
+          <div class="name">Read-only GitHub</div>
+          <div class="what">MCP exposes 4 read tools in read-only mode. No write tools exist.</div>
+          <div class="file">tools/mcp.py</div></div><span class="badge code">code</span></div>
+        <div class="row"><div>
+          <div class="name">Lockdown on untrusted PR text</div>
+          <div class="what">Filters out content from people without push access, so PR text can't steer the agent.</div>
+          <div class="file">tools/mcp.py</div></div><span class="badge code">code</span></div>
+        <div class="row"><div>
+          <div class="name">Each agent sees only its own tools</div>
+          <div class="what">Review guide can only read a PR. The queue planner gets no tools at all.</div>
+          <div class="file">middleware/tool_scope.py</div></div><span class="badge trace">trace B</span></div>
+      </div>
+      <div class="group">
+        <h2>Order of work</h2>
+        <div class="row"><div>
+          <div class="name">One PR per review</div>
+          <div class="what">Refuses a review task that bundles several PRs together.</div>
+          <div class="file">middleware/stash_results.py · OnePrPerReview</div></div><span class="badge code">code</span></div>
+        <div class="row"><div>
+          <div class="name">Review everything before planning</div>
+          <div class="what">Refuses to plan the queue until every PR has a brief, and lists what's missing.</div>
+          <div class="file">middleware/stash_results.py · AllBriefsBeforePlanning</div></div><span class="badge trace">trace C</span></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="group">
+        <h2>Output</h2>
+        <div class="row"><div>
+          <div class="name">Typed results only</div>
+          <div class="what">Every subagent returns a schema: ReviewBrief, DependencyReport, ReviewQueue.</div>
+          <div class="file">subagents/</div></div><span class="badge code">code</span></div>
+        <div class="row"><div>
+          <div class="name">Ungrounded findings dropped</div>
+          <div class="what">If the suggested "fix" is already what the code says, the finding is removed.</div>
+          <div class="file">middleware/stash_results.py · _fix_already_in_code</div></div><span class="badge code">code</span></div>
+        <div class="row"><div>
+          <div class="name">Code owns the facts</div>
+          <div class="what">Lanes, blocked PRs and same-line collisions are computed in code and override the model.</div>
+          <div class="file">tools/queue_facts.py · finalize_queue</div></div><span class="badge code">code</span></div>
+      </div>
+      <div class="group">
+        <h2>Actions</h2>
+        <div class="row"><div>
+          <div class="name">Never approves or merges</div>
+          <div class="what">One publish tool. Edits its own comment in place, so re-runs never duplicate.</div>
+          <div class="file">tools/publish.py</div></div><span class="badge code">code</span></div>
+        <div class="row"><div>
+          <div class="name">Signed webhooks only</div>
+          <div class="what">Rejects any GitHub event without a valid signature.</div>
+          <div class="file">channels/github.py</div></div><span class="badge code">code</span></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
